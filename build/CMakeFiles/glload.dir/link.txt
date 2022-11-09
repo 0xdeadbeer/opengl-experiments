@@ -1,2 +1,0 @@
-/usr/bin/ar qc libglload.a  CMakeFiles/glload.dir/glload/source/gl_load_cpp.o CMakeFiles/glload.dir/glload/source/gl_load.o
-/usr/bin/ranlib libglload.a
