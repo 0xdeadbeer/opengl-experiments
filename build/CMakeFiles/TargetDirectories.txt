@@ -1,0 +1,6 @@
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/edit_cache.dir
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/glutil.dir
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/glimg.dir
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/glload.dir
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/rebuild_cache.dir
+/home/unknown/projects/opengl-experiments/build/CMakeFiles/freeglut.dir
