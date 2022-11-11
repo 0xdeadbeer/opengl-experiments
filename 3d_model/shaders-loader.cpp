@@ -31,7 +31,7 @@ void read_file(const char *path, char *file_contents) {
 		character_index++;
 
 		char curr_char = fgetc(file_pointer);
-		if ('\n' == curr_char) {
+		if (EOF == curr_char) {
 			break; 
 		}
 
@@ -41,10 +41,29 @@ void read_file(const char *path, char *file_contents) {
 	fclose(file_pointer); 
 }
 
+void check_shader(GLuint shader, char *path) {
+	GLint result = GL_FALSE; 
+	int log_length; 
+
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result); 
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length); 
+
+	char *shader_error = (char *) malloc((log_length > 1) ? log_length : 1);
+	glGetShaderInfoLog(shader, log_length, NULL, &shader_error[0]);
+
+	if (0x0 != shader_error[0]) {
+		fprintf(stderr, "Shader '%s': %s\n", path, shader_error);
+	}
+}
+
 void load_shader(GLuint program, const char *path, GLenum type) {
 	GLuint shader = glCreateShader(type); 
 
 	long int shader_size = sizeof_file(path);
+	if (0 == shader_size) {
+		fprintf(stdout, "info: '%s' file shader size is 0\n", path); 
+		return; 
+	}
 	char* file_contents = (char *) malloc(shader_size); 
 
 	read_file(path, file_contents);  
@@ -53,8 +72,12 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 	glShaderSource(shader, 1, &file_contents, NULL);
 	glCompileShader(shader);
 
-	// attach shader
+	// check the shader
+	check_shader(shader, (char *) path);
+
+	// attach shader & link shader
 	glAttachShader(program, shader);
+	glLinkProgram(program);
 
 	// free memory and junk
 	glDeleteShader(shader);

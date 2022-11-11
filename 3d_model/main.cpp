@@ -19,7 +19,6 @@ float vertex_positions[] = {
 void memory_setup() {
 	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
-	glLinkProgram(program);
 
 	glGenBuffers(1, &object_buffer); 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
