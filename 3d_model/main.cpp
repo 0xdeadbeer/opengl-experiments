@@ -17,6 +17,8 @@ float vertex_positions[] = {
 
 // setup memory function
 void memory_setup() {
+	program = glCreateProgram();
+
 	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
 
@@ -29,11 +31,14 @@ void memory_setup() {
 // update output - display function
 void display()
 {
-	program = glCreateProgram();
 	glUseProgram(program);
   glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
+
+	glEnableVertexAttribArray(0); 
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
