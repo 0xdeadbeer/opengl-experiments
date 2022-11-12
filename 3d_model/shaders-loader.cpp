@@ -117,9 +117,10 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 	free(file_contents);
 }
 
-float *load_model(const char *path, float *output_buffer) {
+float *load_model(const char *path) {
 	int vertex_counter = 0, face_counter = 0; 
 	vertex *vertecies = NULL; 
+	float *output_buffer = NULL;
 
 	long int src_size = sizeof_file(path);
 
