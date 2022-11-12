@@ -5,7 +5,7 @@
 #include <GL/freeglut.h>
 #include "shaders-loader.h"
 
-int split(char *data, splitted_string *output_data, size_t size, char delimiter) {
+splitted_strings_arr split(char *data, splitted_string *output_data, size_t size, char delimiter) {
 	split_string_properties properties = {0,0,0};
 	output_data = (splitted_string *) malloc(0);
 
@@ -14,27 +14,23 @@ int split(char *data, splitted_string *output_data, size_t size, char delimiter)
 		if (delimiter != current_char) continue; 
 
 		properties.found_counter++; 
-		printf("size -> %d\n", (properties.found_counter * sizeof(splitted_string)));
 		output_data = (splitted_string *) realloc(output_data, (size_t) ((properties.found_counter+1) * sizeof(splitted_string)));
 		if (NULL == output_data) {
 			fprintf(stderr, "error: failed to reallocate memory");
-			return -1; 
+			return splitted_strings_arr { NULL, -1 }; 
 		}
 		properties.split_end_index = i; 
 		
 		size_t split_size = properties.split_end_index - properties.split_start_index; 
 		char *split_string = (char *) malloc(split_size); 
-		//printf("Character to output -> %c\n", *(data + properties.split_start_index)); 
-		//printf("Size -> %d\n", split_size);
 		
 		strncpy(split_string, (const char*) (data + properties.split_start_index), split_size); 	
 		
 		*(output_data+properties.found_counter) = { split_size, split_string }; 
-			
-		printf("char -> %c\n", current_char);
 		if (size-1 >= i+1) properties.split_start_index = i+1; 
 	}
-	return properties.found_counter;
+
+	return splitted_strings_arr { output_data, properties.found_counter }; 
 }
 
 long int sizeof_file(const char *path) {
@@ -125,13 +121,14 @@ void load_model(const char *path, float *output_buffer) {
 	char *model_src = (char *) malloc(src_size); 
 
 	read_file(path, model_src);
-	splitted_string *lines;
-	printf("Size of lines -> %d\n", src_size);
-	int num_lines = split(model_src, lines, (size_t) src_size, '\n');
-	
-	for (int line = 0; line < num_lines; line++) {
-		printf("Line length: %p\n", lines[line].size);
-	}	
-	
+	splitted_string *lines; 
+	splitted_strings_arr test = split(model_src, lines, (size_t) src_size, '\n');
+	printf("size of array -> %d\n", test.elements);
+
+	// print the whole file model 
+	for (int i = 1; i <= test.elements; i++) {
+		//printf("Size of the string: %d\n", (test.splitted_strings_arr+i)->size);
+		printf("String itself: %s\n", (test.splitted_strings_arr+i)->string);
+	}
 
 }
