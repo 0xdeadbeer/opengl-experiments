@@ -7,11 +7,11 @@
 
 splitted_strings_arr split(char *data, size_t size, char delimiter, int free_data=1) {
 	split_string_properties properties = {0,0,0};
-	splitted_string *output_data = (splitted_string *) malloc(0);
+	splitted_string *output_data = NULL;
 
 	for (int i = 0; i < size; i++) {
 		char current_char = *(data + i); 
-		if (delimiter != current_char) continue; 
+		if (delimiter != current_char && size-1 > i) continue; 
 
 		properties.found_counter++; 
 		output_data = (splitted_string *) realloc(output_data, (size_t) ((properties.found_counter+1) * sizeof(splitted_string)));
@@ -19,12 +19,15 @@ splitted_strings_arr split(char *data, size_t size, char delimiter, int free_dat
 			fprintf(stderr, "error: failed to reallocate memory");
 			return splitted_strings_arr { NULL, -1 }; 
 		}
+
 		properties.split_end_index = i; 
+		if (delimiter != *(data+properties.split_end_index)) properties.split_end_index++;
 		
 		size_t split_size = properties.split_end_index - properties.split_start_index; 
-		char *split_string = (char *) malloc(split_size); 
-		
+		char *split_string = (char *) malloc(split_size+1); 
+	
 		strncpy(split_string, (const char*) (data + properties.split_start_index), split_size); 	
+		*(split_string+split_size) = 0x0;
 		
 		*(output_data+properties.found_counter) = { split_size, split_string }; 
 		if (size-1 >= i+1) properties.split_start_index = i+1; 
@@ -114,23 +117,68 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 	free(file_contents);
 }
 
-void load_model(const char *path, float *output_buffer) {
+float *load_model(const char *path, float *output_buffer) {
+	int vertex_counter = 0, face_counter = 0; 
+	vertex *vertecies = NULL; 
+
 	long int src_size = sizeof_file(path);
+
 	if (0 == src_size) {
 		fprintf(stdout, "info: model file is empty!");
-		return;
+		return NULL;
 	}
+
 	char *model_src = (char *) malloc(src_size); 
 
 	read_file(path, model_src);
-	splitted_strings_arr test = split(model_src, (size_t) src_size, '\n', 0);
+	splitted_strings_arr lines = split(model_src, (size_t) src_size, '\n');
 
-	printf("size of array -> %d\n", test.elements);
+	for (int i = 1; i <= lines.elements; i++) {
+		char *line = (lines.splitted_strings_arr+i)->string;
+		size_t line_length = (lines.splitted_strings_arr+i)->size;
+		
+		splitted_strings_arr tokens = split(line, line_length, ' ', 0); 
 
-	// print the whole file model 
-	for (int i = 1; i <= test.elements; i++) {
-		// printf("Size of the string: %d\n", (test.splitted_strings_arr+i)->size);
-		printf("String itself: %s\n", (test.splitted_strings_arr+i)->string);
+		if (0 == strcmp("v", (tokens.splitted_strings_arr+1)->string)) {
+			vertex_counter++; 
+
+			vertecies = (vertex *) realloc(vertecies, (size_t) (vertex_counter * sizeof(vertex)));	
+			if (NULL == vertecies) {
+				fprintf(stderr, "error: failed to reallocate memory");
+				return NULL; 
+			}
+
+			float x = atof( (tokens.splitted_strings_arr+2)->string), 
+						y = atof( (tokens.splitted_strings_arr+3)->string), 
+						z = atof( (tokens.splitted_strings_arr+4)->string), 
+					w = 1.0f; 
+
+			*(vertecies+vertex_counter-1) = { x, y, z, w } ;
+		}
+		else if (0 == strcmp("f", (tokens.splitted_strings_arr+1)->string)) {
+			for (int v = 2; v < 5; v++) {
+				face_counter++;
+				char *vertex_value = (tokens.splitted_strings_arr+v)->string;
+				size_t length = (tokens.splitted_strings_arr+v)->size; 
+				
+				splitted_strings_arr vertex_data = split(vertex_value, length, '/');
+				int vertex_index = atoi( (vertex_data.splitted_strings_arr+1)->string);	
+				
+				float x = (vertecies+vertex_index-1)->x,
+							y = (vertecies+vertex_index-1)->y,
+							z = (vertecies+vertex_index-1)->z,
+							w = (vertecies+vertex_index-1)->w;
+				
+				printf("Face counter -> %d\n", face_counter);
+				output_buffer = (float *) realloc(output_buffer, (size_t) (face_counter * sizeof(float) * 4));
+				
+				*(output_buffer+((face_counter-1)*4)) = x; 
+				*(output_buffer+((face_counter-1)*4)+1) = y; 
+				*(output_buffer+((face_counter-1)*4)+2) = z;
+				*(output_buffer+((face_counter-1)*4)+3) = w; 	
+			}
+		}
 	}
-
+	
+	return output_buffer; 
 }

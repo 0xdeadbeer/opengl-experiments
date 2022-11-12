@@ -2,7 +2,6 @@
 #define SHADERS_LOADER_H 
 
 // structs
-
 struct splitted_string {
 	size_t size; 
 	char *string;
@@ -13,7 +12,14 @@ struct splitted_strings_arr {
 	int elements; 
 };
 
-struct split_string_properties{
+struct vertex {
+	float x; 
+	float y; 
+	float z; 
+	float w; 
+}; 
+
+struct split_string_properties {
 	int split_start_index; 
 	int split_end_index; 
 	int found_counter; 
@@ -88,6 +94,6 @@ Read vertex data from a given file and write it to an output buffer.
 @path: path to the model file 
 @output_buffer: pointer to the memory where the function will write the vertex data.
 */
-void load_model(const char *path, float *output_buffer); 
+float *load_model(const char *path, float *output_buffer); 
 
 #endif

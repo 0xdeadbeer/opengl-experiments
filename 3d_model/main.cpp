@@ -18,11 +18,11 @@ void memory_setup() {
 	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
 
-	load_model("./cube.obj", vertex_positions);
+	vertex_positions = load_model("./cube.obj", vertex_positions);
 
 	glGenBuffers(1, &object_buffer); 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_positions), vertex_positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 144*4, vertex_positions, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
 
@@ -37,7 +37,7 @@ void display()
 	glEnableVertexAttribArray(0); 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
