@@ -5,9 +5,9 @@
 #include <GL/freeglut.h>
 #include "shaders-loader.h"
 
-splitted_strings_arr split(char *data, splitted_string *output_data, size_t size, char delimiter) {
+splitted_strings_arr split(char *data, size_t size, char delimiter, int free_data=1) {
 	split_string_properties properties = {0,0,0};
-	output_data = (splitted_string *) malloc(0);
+	splitted_string *output_data = (splitted_string *) malloc(0);
 
 	for (int i = 0; i < size; i++) {
 		char current_char = *(data + i); 
@@ -29,6 +29,8 @@ splitted_strings_arr split(char *data, splitted_string *output_data, size_t size
 		*(output_data+properties.found_counter) = { split_size, split_string }; 
 		if (size-1 >= i+1) properties.split_start_index = i+1; 
 	}
+
+	if (1 == free_data) free(data);
 
 	return splitted_strings_arr { output_data, properties.found_counter }; 
 }
@@ -121,13 +123,13 @@ void load_model(const char *path, float *output_buffer) {
 	char *model_src = (char *) malloc(src_size); 
 
 	read_file(path, model_src);
-	splitted_string *lines; 
-	splitted_strings_arr test = split(model_src, lines, (size_t) src_size, '\n');
+	splitted_strings_arr test = split(model_src, (size_t) src_size, '\n', 0);
+
 	printf("size of array -> %d\n", test.elements);
 
 	// print the whole file model 
 	for (int i = 1; i <= test.elements; i++) {
-		//printf("Size of the string: %d\n", (test.splitted_strings_arr+i)->size);
+		// printf("Size of the string: %d\n", (test.splitted_strings_arr+i)->size);
 		printf("String itself: %s\n", (test.splitted_strings_arr+i)->string);
 	}
 
