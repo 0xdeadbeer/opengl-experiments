@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <string.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -117,8 +118,8 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 	free(file_contents);
 }
 
-float *load_model(const char *path) {
-	int vertex_counter = 0, face_counter = 0; 
+vertex_data load_model(const char *path) {
+	int vertex_counter = 0, face_vertex_counter = 0; 
 	vertex *vertecies = NULL; 
 	float *output_buffer = NULL;
 
@@ -126,7 +127,7 @@ float *load_model(const char *path) {
 
 	if (0 == src_size) {
 		fprintf(stdout, "info: model file is empty!");
-		return NULL;
+		return (vertex_data) { };
 	}
 
 	char *model_src = (char *) malloc(src_size); 
@@ -146,7 +147,7 @@ float *load_model(const char *path) {
 			vertecies = (vertex *) realloc(vertecies, (size_t) (vertex_counter * sizeof(vertex)));	
 			if (NULL == vertecies) {
 				fprintf(stderr, "error: failed to reallocate memory");
-				return NULL; 
+				return (vertex_data) {} ;
 			}
 
 			float x = atof( (tokens.splitted_strings_arr+2)->string), 
@@ -158,7 +159,7 @@ float *load_model(const char *path) {
 		}
 		else if (0 == strcmp("f", (tokens.splitted_strings_arr+1)->string)) {
 			for (int v = 2; v < 5; v++) {
-				face_counter++;
+				face_vertex_counter++;
 				char *vertex_value = (tokens.splitted_strings_arr+v)->string;
 				size_t length = (tokens.splitted_strings_arr+v)->size; 
 				
@@ -170,16 +171,46 @@ float *load_model(const char *path) {
 							z = (vertecies+vertex_index-1)->z,
 							w = (vertecies+vertex_index-1)->w;
 				
-				printf("Face counter -> %d\n", face_counter);
-				output_buffer = (float *) realloc(output_buffer, (size_t) (face_counter * sizeof(float) * 4));
+				output_buffer = (float *) realloc(output_buffer, (size_t) (face_vertex_counter * sizeof(float) * 4));
 				
-				*(output_buffer+((face_counter-1)*4)) = x; 
-				*(output_buffer+((face_counter-1)*4)+1) = y; 
-				*(output_buffer+((face_counter-1)*4)+2) = z;
-				*(output_buffer+((face_counter-1)*4)+3) = w; 	
+				*(output_buffer+((face_vertex_counter-1)*4)) = x; 
+				*(output_buffer+((face_vertex_counter-1)*4)+1) = y; 
+				*(output_buffer+((face_vertex_counter-1)*4)+2) = z;
+				*(output_buffer+((face_vertex_counter-1)*4)+3) = w; 	
 			}
 		}
 	}
 	
-	return output_buffer; 
+	vertex_data output_struct = { output_buffer, face_vertex_counter, };
+
+	return output_struct; 
+}
+
+color_data randomize_color(const size_t faces) {
+	size_t vertex_count = 0; 
+	size_t required_size = faces * 3 * 4 * sizeof(float);
+	printf("required size -> %d\n", required_size);
+	float *color_buffer = (float *) malloc((size_t) required_size);
+
+	srand(time(NULL)); // take random seed from time 	
+	for (int face = 0; face < faces; face++) {
+
+		float rgb[] = {
+			(float) rand() / (float) RAND_MAX,
+			(float) rand() / (float) RAND_MAX,
+			(float) rand() / (float) RAND_MAX,
+			1.0f, 
+		};
+
+		for (int vertex = 0; vertex < 3; vertex++) {
+			vertex_count++; 
+			for (int dimension = 0; dimension < 5; dimension++) {
+				int location = (face * 3 * 4) + (vertex * 4) + dimension;
+				*(color_buffer+location) = *(rgb+dimension);
+			}
+		}
+	}
+
+	color_data output_data = { color_buffer, vertex_count }; 
+	return output_data;
 }

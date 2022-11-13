@@ -19,6 +19,16 @@ struct vertex {
 	float w; 
 }; 
 
+struct vertex_data {
+	float *buffer;
+	size_t len;
+};
+
+struct color_data {
+	float *buffer;
+	size_t len; 
+};
+
 struct split_string_properties {
 	int split_start_index; 
 	int split_end_index; 
@@ -94,6 +104,8 @@ and return the output_buffer location.
 
 @return: new pointer to the output buffer
 */
-float *load_model(const char *path); 
+vertex_data load_model(const char *path); 
+
+color_data randomize_color(const size_t faces);
 
 #endif

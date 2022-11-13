@@ -1,6 +1,6 @@
 LIBS=-lGLEW -lGLU -lglfw -lglut -lGL
 COMPILER_FLAGS=-Wall
-DEBUG_COMPILER_FLAGS=-Wall -Wextra -ggdb3 -D DEBUG -O0
+DEBUG_COMPILER_FLAGS=-g -Wall -Wextra -ggdb3 -D DEBUG -O0
 BUILD_DIR=./build
 OUTPUT_LOCATION=$(BUILD_DIR)/main
 

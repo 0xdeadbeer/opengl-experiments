@@ -7,6 +7,10 @@
 // global variables
 GLuint program;
 GLuint object_buffer; 
+GLuint color_buffer; 
+
+vertex_data data = load_model("./models/object.obj");
+color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
 void memory_setup() {
@@ -15,11 +19,15 @@ void memory_setup() {
 	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
 
-	float *vertex_positions = load_model("./cube.obj");
-
 	glGenBuffers(1, &object_buffer); 
+	glGenBuffers(1, &color_buffer);
+
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
-	glBufferData(GL_ARRAY_BUFFER, 144*4, vertex_positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.len*4*sizeof(float), data.buffer, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
+	glBufferData(GL_ARRAY_BUFFER, color_data.len*4*sizeof(float), color_data.buffer, GL_STATIC_DRAW); 
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
 
@@ -34,7 +42,12 @@ void display()
 	glEnableVertexAttribArray(0); 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
+	
+	glEnableVertexAttribArray(1); 
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, data.len);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
@@ -57,6 +70,10 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(glew_err));
 		return 1;
 	}
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
 
 	// load the models into memory, setup the functions
 	memory_setup();
