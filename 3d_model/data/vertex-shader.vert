@@ -10,7 +10,7 @@ float frustum_scale = 1.0f;
 void main() {
 
 	vec4 camera_pos = position;
-	camera_pos.z -= 1.0f;
+	camera_pos.z -= 2.0f;
 
 	vec4 clip_pos;
 	clip_pos.xy = camera_pos.xy * frustum_scale;

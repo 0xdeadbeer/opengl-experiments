@@ -9,7 +9,7 @@ GLuint program;
 GLuint object_buffer; 
 GLuint color_buffer; 
 
-vertex_data data = load_model("./models/sphere.obj");
+vertex_data data = load_model("./models/object.obj");
 color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
