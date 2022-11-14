@@ -9,7 +9,7 @@ GLuint program;
 GLuint object_buffer; 
 GLuint color_buffer; 
 
-vertex_data data = load_model("./models/object.obj");
+vertex_data data = load_model("./models/sphere.obj");
 color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 
 	// load the models into memory, setup the functions
 	memory_setup();

@@ -98,14 +98,29 @@ Load model into the program.
 
 <Long description>
 Read vertex data from a given file and write it to an output buffer
-and return the output_buffer location.
+and return the output_buffer's location (inside a struct) alongside the number
+of vertecies found.
 
 @param path: path to the model file 
 
-@return: new pointer to the output buffer
+@return: structure containing a pointer to the buffer, and the number of vertecies inside the buffer (can be used to calculate the size - vertecies * 4 * sizeof(float))
 */
 vertex_data load_model(const char *path); 
 
+/**
+Randomize color for each face
+
+<Long description>
+Given a number of faces, the function will generate a buffer of floats for each 
+face having its own randomly generated color. The number of vertecies is calculated 
+with the following formula -> faces * 3 (assuming a face is a triangle therefore has 
+3 vertecies), size of the bufer -> faces * 3 * 3 * sizeof(float) (assuming a vertex 
+has 3 dimensions - rgb and each is a float)
+
+@param faces: number of faces 
+
+@return: structure containing a pointer to the generated color buffer, and the number of vertecies inside the buffer (can be used to calculate the size - vertecies * 4 * sizeof(float))
+*/
 color_data randomize_color(const size_t faces);
 
 #endif
