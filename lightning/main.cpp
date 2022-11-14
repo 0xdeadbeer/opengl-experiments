@@ -8,9 +8,12 @@
 GLuint program;
 GLuint object_buffer; 
 GLuint color_buffer; 
+GLuint normal_buffer; 
+GLuint offset_unif;
 
-vertex_data data = load_model("./models/smooth-monkey.obj");
+vertex_data data = load_model("./models/monkey.obj");
 color_data color_data = randomize_color(data.len/3);
+normal_data normal_data = calc_normals(data.len, data.buffer);
 
 // setup memory function
 void memory_setup() {
@@ -21,6 +24,7 @@ void memory_setup() {
 
 	glGenBuffers(1, &object_buffer); 
 	glGenBuffers(1, &color_buffer);
+	glGenBuffers(1, &normal_buffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
 	glBufferData(GL_ARRAY_BUFFER, data.len*4*sizeof(float), data.buffer, GL_STATIC_DRAW);
@@ -28,12 +32,19 @@ void memory_setup() {
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
 	glBufferData(GL_ARRAY_BUFFER, color_data.len*4*sizeof(float), color_data.buffer, GL_STATIC_DRAW); 
 
+	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+	glBufferData(GL_ARRAY_BUFFER, normal_data.len*sizeof(float), normal_data.buffer, GL_STATIC_DRAW);
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
+
+float offset = 0.0f;
+float offset_updater = 0.001f;
 
 // update output - display function
 void display()
 {
+	offset += offset_updater;
 	glUseProgram(program);
   glClear(GL_COLOR_BUFFER_BIT);
 
@@ -44,8 +55,14 @@ void display()
 
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
 	
-	glEnableVertexAttribArray(1); 
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	//glEnableVertexAttribArray(1); 
+	////glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	offset_unif = glGetUniformLocation(program, "offset");
+	glUniform1f(offset_unif, offset);
 
 	glDrawArrays(GL_TRIANGLES, 0, data.len);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -54,6 +71,8 @@ void display()
 
 	glutSwapBuffers();
 	glutPostRedisplay();
+
+	if (offset >= 3 || offset <= -1) offset_updater = -offset_updater;
 }
 
 // main function
