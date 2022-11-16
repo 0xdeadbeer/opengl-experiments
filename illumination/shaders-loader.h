@@ -19,9 +19,17 @@ struct vertex {
 	float w; 
 }; 
 
+struct normal {
+	float x;
+	float y; 
+	float z; 
+};
+
 struct vertex_data {
-	float *buffer;
+	float *vertex_buffer;
 	size_t len;
+	
+	float *normals_buffer; 
 };
 
 struct color_data {
@@ -132,5 +140,7 @@ color_data randomize_color(const size_t faces);
 Calculate normals for each face/triangle
 */
 normal_data calc_normals(const size_t vertecies, float *vertex_data);
+
+normal_data load_normals(const char *path); 
 
 #endif

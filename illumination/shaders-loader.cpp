@@ -72,17 +72,20 @@ void read_file(const char *path, char *file_contents) {
 	}
 
 	int character_index = -1;
-	while(1) {
-		character_index++;
 
-		char curr_char = fgetc(file_pointer);
-		if (EOF == curr_char) {
-			break; 
+	char curr_char;
+	do {
+		curr_char = fgetc(file_pointer);
+
+		character_index++;
+		if (-1 == curr_char) {
+			file_contents[character_index] = 0x0; 
+			break;
 		}
 
-		file_contents[character_index] = curr_char; 
-	}
-	
+		file_contents[character_index] = curr_char;
+	} while (EOF != curr_char);
+
 	fclose(file_pointer); 
 }
 
@@ -130,9 +133,11 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 }
 
 vertex_data load_model(const char *path) {
-	int vertex_counter = 0, face_vertex_counter = 0; 
+	int vertex_counter = 0, face_vertex_counter = 0, normals_counter = 0; 
 	vertex *vertecies = NULL; 
+	normal *normals = NULL; 
 	float *output_buffer = NULL;
+	float *normals_buffer = NULL;
 
 	long int src_size = sizeof_file(path);
 
@@ -168,13 +173,27 @@ vertex_data load_model(const char *path) {
 
 			*(vertecies+vertex_counter-1) = { x, y, z, w } ;
 		}
+		else if (0 == strcmp("vn", (tokens.splitted_strings_arr+1)->string)) {
+			normals_counter++;
+			normals = (normal *) realloc(normals, (size_t) (normals_counter * sizeof(normal)));
+			
+			if (NULL == normals) {
+				fprintf(stderr, "error: failed to reallocate memory");
+				return (vertex_data) {}; 
+			}
+
+			float x = atof( (tokens.splitted_strings_arr+2)->string),
+						y = atof( (tokens.splitted_strings_arr+3)->string),
+						z = atof( (tokens.splitted_strings_arr+4)->string);
+			*(normals+normals_counter-1) = { x, y, z };
+		}
 		else if (0 == strcmp("f", (tokens.splitted_strings_arr+1)->string)) {
 			for (int v = 2; v < 5; v++) {
 				face_vertex_counter++;
 				char *vertex_value = (tokens.splitted_strings_arr+v)->string;
 				size_t length = (tokens.splitted_strings_arr+v)->size; 
 				
-				splitted_strings_arr vertex_data = split(vertex_value, length, '/');
+				splitted_strings_arr vertex_data = split(vertex_value, length, '/', 0);
 				int vertex_index = atoi( (vertex_data.splitted_strings_arr+1)->string);	
 				
 				float x = (vertecies+vertex_index-1)->x,
@@ -188,11 +207,23 @@ vertex_data load_model(const char *path) {
 				*(output_buffer+((face_vertex_counter-1)*4)+1) = y; 
 				*(output_buffer+((face_vertex_counter-1)*4)+2) = z;
 				*(output_buffer+((face_vertex_counter-1)*4)+3) = w; 	
+
+				int normal_index = atoi( (vertex_data.splitted_strings_arr+3)->string);
+
+				float xn = (normals+normal_index-1)->x,
+							yn = (normals+normal_index-1)->y,
+							zn = (normals+normal_index-1)->z;
+
+				normals_buffer = (float *) realloc(normals_buffer, (size_t) (face_vertex_counter * sizeof(float) * 3));
+
+				*(normals_buffer+((face_vertex_counter-1)*3)) = xn; 
+				*(normals_buffer+((face_vertex_counter-1)*3)+1) = yn; 
+				*(normals_buffer+((face_vertex_counter-1)*3)+2) = zn;
 			}
 		}
 	}
 	
-	vertex_data output_struct = { output_buffer, face_vertex_counter, };
+	vertex_data output_struct = { output_buffer, face_vertex_counter, normals_buffer };
 
 	return output_struct; 
 }
@@ -227,24 +258,45 @@ color_data randomize_color(const size_t faces) {
 }
 
 normal_data calc_normals(const size_t vertecies, float *vertex_data) {
+	printf("Verticies -> %d\n", vertecies);
 	size_t faces = vertecies / 3; 
-	size_t normals_count = faces * 3; 
+	size_t normals_count = faces * 3 * 3; 
 	float *normals_buffer = (float *) malloc(normals_count * sizeof(float));
 	for (int face = 0; face < faces; face++) {
 		float vertex_a[3] = { *(vertex_data+(face*3)), *(vertex_data+(face*3)+1), *(vertex_data+(face*3)+2) };
 		float vertex_b[3] = { *(vertex_data+(face*3)+3), *(vertex_data+(face*3)+4), *(vertex_data+(face*3)+5) };
 		float vertex_c[3] = { *(vertex_data+(face*3)+6), *(vertex_data+(face*3)+7), *(vertex_data+(face*3)+8) };
 
-		float vector_ab[3] = { vertex_a[0] - vertex_b[0], vertex_a[1] - vertex_b[1], vertex_a[2] - vertex_b[2] }; 
-		float vector_bc[3] = { vertex_b[0] - vertex_c[0], vertex_b[1] - vertex_c[1], vertex_b[2] - vertex_c[2] };
+		float vector_ab[3] = { vertex_b[0] - vertex_a[0], vertex_b[1] - vertex_a[1], vertex_b[2] - vertex_a[2] }; 
+		float vector_bc[3] = { vertex_c[0] - vertex_a[0], vertex_c[1] - vertex_a[1], vertex_c[2] - vertex_a[2] };
 
 		float *normal = cross_product(vector_ab, vector_bc);
 
-		*(normals_buffer+(face*3)) = *(normal);
-		*(normals_buffer+(face*3)+1) = *(normal+1);	
-		*(normals_buffer+(face*3)+2) = *(normal+2);
+		for (int vertex = 0; vertex < 3; vertex++) {
+			*(normals_buffer+(face*3*3)+(vertex*3)) = *(normal);
+			*(normals_buffer+(face*3*3)+(vertex*3)+1) = *(normal+1);	
+			*(normals_buffer+(face*3*3)+(vertex*3)+2) = *(normal+2);
+		}
 	}
 
 	normal_data output_struct = {normals_buffer, normals_count};
 	return output_struct;
 }
+
+/*normal_data load_normals(const char *path) {
+	float *output_buffer = NULL;
+	long int src_size = sizeof_file(path);
+	char *model_src = (char *) malloc(src_size);
+	
+	read_file(path, model_src);
+	splitted_strings_arr lines = split(model_src, (size_t) src_size, '\n');
+
+	for (int i = 0; i < lines.elements; i++) {
+		char *line = (lines.splitted_strings_arr+i)->string;
+		size_t line_length = (lines.splitted_strings_arr+i)->size; 
+
+		splitted_strings_arr tokens = split(line, line_length, ' ', 0);
+		
+	}
+}
+*/

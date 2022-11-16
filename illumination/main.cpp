@@ -11,9 +11,8 @@ GLuint color_buffer;
 GLuint normal_buffer; 
 GLuint offset_unif;
 
-vertex_data data = load_model("./models/monkey.obj");
+vertex_data data = load_model("./models/sphere.obj");
 color_data color_data = randomize_color(data.len/3);
-normal_data normal_data = calc_normals(data.len, data.buffer);
 
 // setup memory function
 void memory_setup() {
@@ -27,37 +26,40 @@ void memory_setup() {
 	glGenBuffers(1, &normal_buffer);
 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
-	glBufferData(GL_ARRAY_BUFFER, data.len*4*sizeof(float), data.buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.len*4*sizeof(float), data.vertex_buffer, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
 	glBufferData(GL_ARRAY_BUFFER, color_data.len*4*sizeof(float), color_data.buffer, GL_STATIC_DRAW); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
-	glBufferData(GL_ARRAY_BUFFER, normal_data.len*sizeof(float), normal_data.buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, data.len*3*sizeof(float), data.normals_buffer, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
 
 float offset = 0.0f;
-float offset_updater = 0.001f;
+float offset_updater = 0.00005f;
 
 // update output - display function
 void display()
 {
 	offset += offset_updater;
 	glUseProgram(program);
-  glClear(GL_COLOR_BUFFER_BIT);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearDepth(1.0f);
+
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
-
 	glEnableVertexAttribArray(0); 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
-	
-	//glEnableVertexAttribArray(1); 
-	////glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1); 
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
+	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -72,7 +74,7 @@ void display()
 	glutSwapBuffers();
 	glutPostRedisplay();
 
-	if (offset >= 3 || offset <= -1) offset_updater = -offset_updater;
+	if (offset >= 2 || offset <= -2) offset_updater = -offset_updater;
 }
 
 // main function
