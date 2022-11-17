@@ -6,12 +6,13 @@
 
 // global variables
 GLuint program;
+GLuint vao; 
 GLuint object_buffer; 
 GLuint color_buffer; 
 GLuint normal_buffer; 
 GLuint offset_unif;
 
-vertex_data data = load_model("./models/sphere.obj");
+vertex_data data = load_model("./models/object.obj");
 color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
@@ -46,10 +47,11 @@ void display()
 	offset += offset_updater;
 	glUseProgram(program);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClearDepth(1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// glClearDepth(0.5f);
 
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
 	glEnableVertexAttribArray(0); 
@@ -67,8 +69,6 @@ void display()
 	glUniform1f(offset_unif, offset);
 
 	glDrawArrays(GL_TRIANGLES, 0, data.len);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glUseProgram(0);
 
 	glutSwapBuffers();
@@ -92,9 +92,19 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
+
+	glGenVertexArrays(1, &vao); 
+	glBindVertexArray(vao);
+	
+	// debug 
+	GLenum error = glGetError(); 
+	printf("DEBUG: %d\n", error);
 
 	// load the models into memory, setup the functions
 	memory_setup();
