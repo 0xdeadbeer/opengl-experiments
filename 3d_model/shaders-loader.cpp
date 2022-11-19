@@ -61,16 +61,20 @@ void read_file(const char *path, char *file_contents) {
 	}
 
 	int character_index = -1;
-	while(1) {
-		character_index++;
+	char curr_char; 
+	
+	do {
+		curr_char = fgetc(file_pointer); 
+		character_index++; 
 
-		char curr_char = fgetc(file_pointer);
-		if (EOF == curr_char) {
-			break; 
+		if (-1 == curr_char) {
+			file_contents[character_index] = 0x0; 
+			break;	
 		}
 
 		file_contents[character_index] = curr_char; 
-	}
+
+	} while (EOF != curr_char);
 	
 	fclose(file_pointer); 
 }

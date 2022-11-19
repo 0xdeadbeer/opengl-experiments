@@ -1,4 +1,4 @@
-#version 330 core
+#version 330
 
 smooth in vec4 the_color; 
 

@@ -1,4 +1,4 @@
-#version 330 core
+#version 330
 
 layout (location = 0) in vec4 position;
 layout (location = 1) in vec4 color; 
@@ -6,6 +6,8 @@ layout (location = 1) in vec4 color;
 smooth out vec4 the_color; 
 
 float frustum_scale = 1.0f;
+float near = 0.1f; 
+float far = 10.0f;
 
 void main() {
 
@@ -15,7 +17,9 @@ void main() {
 	vec4 clip_pos;
 	clip_pos.xy = camera_pos.xy * frustum_scale;
 	
-	clip_pos.z = camera_pos.z + 1.0f;
+	// clip_pos.z = camera_pos.z + 1.0f;
+	clip_pos.z = camera_pos.z * (near + far) / (near - far); 
+	clip_pos.z += 2 * near * far / (near - far);
 	clip_pos.w = -camera_pos.z;
 
 	gl_Position = clip_pos;

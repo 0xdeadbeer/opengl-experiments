@@ -9,7 +9,7 @@ GLuint program;
 GLuint object_buffer; 
 GLuint color_buffer; 
 
-vertex_data data = load_model("./models/smooth-sphere.obj");
+vertex_data data = load_model("./models/monkey.obj");
 color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
@@ -35,8 +35,9 @@ void memory_setup() {
 void display()
 {
 	glUseProgram(program);
-  glClear(GL_COLOR_BUFFER_BIT);
-
+	
+	glClearColor(0.1f, 0.1f, 0.1f, 0.1f);	
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
 
 	glEnableVertexAttribArray(0); 
@@ -71,6 +72,9 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	glEnable(GL_DEPTH_TEST); 
+	glDepthFunc(GL_LESS);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
@@ -78,6 +82,10 @@ int main(int argc, char** argv)
 	// load the models into memory, setup the functions
 	memory_setup();
   glutDisplayFunc(display);
+
+	// debug 
+	GLenum error = glGetError(); 
+	fprintf(stderr, "debug eror code: %d\n", error);
 
 	// enter the event loop
   glutMainLoop();
