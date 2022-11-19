@@ -12,7 +12,7 @@ GLuint color_buffer;
 GLuint normal_buffer; 
 GLuint offset_unif;
 
-vertex_data data = load_model("./models/object.obj");
+vertex_data data = load_model("./models/rings.obj");
 color_data color_data = randomize_color(data.len/3);
 
 // setup memory function
@@ -44,7 +44,7 @@ float offset_updater = 0.00005f;
 // update output - display function
 void display()
 {
-	offset += offset_updater;
+	//offset += offset_updater;
 	glUseProgram(program);
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
