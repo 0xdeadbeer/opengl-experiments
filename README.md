@@ -10,7 +10,7 @@
   <img src="/3d_model/images/3d_models_1.png" height="200" />
   <img src="/3d_model/images/3d_models_2.png" height="200" />
   <br><br>
-  <li>illumination - Illumination playground</li>
+  <li><a href="./illumination/main.cpp">illumination</a> - Illumination playground</li>
   <img src="/illumination/images/illumination_1.png" height="200" /> 
   <img src="/illumination/images/illumination_2.png" height="200" />
   <li>games - Mini games in OpenGL</li>
