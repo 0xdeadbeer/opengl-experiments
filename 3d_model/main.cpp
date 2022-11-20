@@ -6,8 +6,8 @@
 
 // global variables
 GLuint program;
-GLuint object_buffer; 
-GLuint color_buffer; 
+GLuint object_buffer, color_buffer; 
+GLuint z_offset_unif, frustum_scale_unif, near_unif, far_unif;
 
 vertex_data data = load_model("./models/monkey.obj");
 color_data color_data = randomize_color(data.len/3);
@@ -28,6 +28,11 @@ void memory_setup() {
 	glBindBuffer(GL_ARRAY_BUFFER, color_buffer); 
 	glBufferData(GL_ARRAY_BUFFER, color_data.len*4*sizeof(float), color_data.buffer, GL_STATIC_DRAW); 
 
+	z_offset_unif = glGetUniformLocation(program, "z_offset"); 
+	frustum_scale_unif = glGetUniformLocation(program, "frustum_scale"); 
+	near_unif = glGetUniformLocation(program, "near"); 
+	far_unif = glGetUniformLocation(program, "far"); 
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
 
@@ -47,6 +52,11 @@ void display()
 	
 	glEnableVertexAttribArray(1); 
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glUniform1f(z_offset_unif, 2.0f);
+	glUniform1f(frustum_scale_unif, 1.0f);
+	glUniform1f(near_unif, 0.1f);
+	glUniform1f(far_unif, 10.0f);
 
 	glDrawArrays(GL_TRIANGLES, 0, data.len);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

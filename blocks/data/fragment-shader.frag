@@ -1,6 +1,6 @@
 #version 330
 
-smooth in vec4 the_color; 
+smooth in vec4 the_color;
 in vec3 normal_vector;
 in vec3 current_position;
 

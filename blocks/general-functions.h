@@ -1,5 +1,5 @@
-#ifndef SHADERS_LOADER_H 
-#define SHADERS_LOADER_H 
+#ifndef GENERAL_FUNCTIONS_H
+#define GENERAL_FUNCTIONS_H
 
 // structs
 struct splitted_string {
@@ -19,13 +19,26 @@ struct vertex {
 	float w; 
 }; 
 
+struct normal {
+	float x;
+	float y; 
+	float z; 
+};
+
 struct vertex_data {
-	float *buffer;
+	float *vertex_buffer;
 	size_t len;
+	
+	float *normals_buffer; 
 };
 
 struct color_data {
 	float *buffer;
+	size_t len; 
+};
+
+struct normal_data {
+	float *buffer; 
 	size_t len; 
 };
 
@@ -114,7 +127,7 @@ Randomize color for each face
 Given a number of faces, the function will generate a buffer of floats for each 
 face having its own randomly generated color. The number of vertecies is calculated 
 with the following formula -> faces * 3 (assuming a face is a triangle therefore has 
-3 vertecies), size of the buffer -> faces * 3 * 3 * sizeof(float) (assuming a vertex 
+3 vertecies), size of the bufer -> faces * 3 * 3 * sizeof(float) (assuming a vertex 
 has 3 dimensions - rgb and each is a float)
 
 @param faces: number of faces 
@@ -122,5 +135,12 @@ has 3 dimensions - rgb and each is a float)
 @return: structure containing a pointer to the generated color buffer, and the number of vertecies inside the buffer (can be used to calculate the size - vertecies * 4 * sizeof(float))
 */
 color_data randomize_color(const size_t faces);
+
+/**
+Calculate normals for each face/triangle
+*/
+normal_data calc_normals(const size_t vertecies, float *vertex_data);
+
+normal_data load_normals(const char *path); 
 
 #endif
