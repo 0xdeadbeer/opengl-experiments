@@ -3,7 +3,7 @@
 
 <b>Author:</b> Osamu-KJ
 
-<b>Blog and learning resources: </b> <a href="https://osamu-kj.gitbook.io/">IT for funn!</a>
+<b>Blog and learning resources: </b> <a href="https://osamu-kj.gitbook.io/">0x0_nerdz_c0rner!</a>
 
 <ul>
   <li><a href="./3d_model/main.cpp">3d_model</a> - Load a model from the disk into opengl</li>
