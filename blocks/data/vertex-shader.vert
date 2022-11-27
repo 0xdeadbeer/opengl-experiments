@@ -3,7 +3,7 @@
 layout (location = 0) in vec4 position;
 layout (location = 1) in vec3 normal;
 
-uniform vec4 color; 
+uniform vec4 color ;
 uniform vec4 offset; 
 
 smooth out vec4 the_color;

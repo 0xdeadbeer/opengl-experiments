@@ -1,52 +1,7 @@
 #ifndef GENERAL_FUNCTIONS_H
 #define GENERAL_FUNCTIONS_H
 
-// structs
-struct splitted_string {
-	size_t size; 
-	char *string;
-};
-
-struct splitted_strings_arr {
-	splitted_string *splitted_strings_arr; 
-	int elements; 
-};
-
-struct vertex {
-	float x; 
-	float y; 
-	float z; 
-	float w; 
-}; 
-
-struct normal {
-	float x;
-	float y; 
-	float z; 
-};
-
-struct vertex_data {
-	float *vertex_buffer;
-	size_t len;
-	
-	float *normals_buffer; 
-};
-
-struct color_data {
-	float *buffer;
-	size_t len; 
-};
-
-struct normal_data {
-	float *buffer; 
-	size_t len; 
-};
-
-struct split_string_properties {
-	int split_start_index; 
-	int split_end_index; 
-	int found_counter; 
-};
+#include "data-structures.h"
 
 /**
 Split the string into substrings. 

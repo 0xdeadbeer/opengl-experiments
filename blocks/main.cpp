@@ -6,7 +6,10 @@
 
 // global variables
 GLuint program, vao;
-GLuint object_buffer, normal_buffer; 
+
+GLuint player_vertex_buffer, player_normal_buffer,
+        block_vertex_buffer, block_normal_buffer,
+        bullet_vertex_buffer, bullet_normal_buffer; 
 GLuint color_unif, offset_unif; 
 
 // models (vertecies + normals)
@@ -22,17 +25,19 @@ GLfloat bullet_color[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 // offsets
 GLfloat player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f }; 
 GLfloat block_offset[] = { 0.0f, 30.0f, -35.0f, 0.0f }; 
-GLfloat bullet_offset[] = { 0.0f, 0.0f, -5.0f, 0.0f };
+GLfloat bullet_offset[] = { 0.0f, 0.0f, -35.0f, 0.0f };
 
 // scales 
 
 // rotations
 
 // switch vbo data
-void switch_vbo(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage) {
+void load_gpu_data(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage) {
   glBindBuffer(target, buffer); 
   glBufferData(target, size, data, usage); 
 }
+
+// draw function 
 
 // setup memory function
 void memory_setup() {
@@ -41,12 +46,28 @@ void memory_setup() {
 	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
 
-	glGenBuffers(1, &object_buffer); 
-	glGenBuffers(1, &normal_buffer);
+  glGenBuffers(1, &player_vertex_buffer); 
+  glGenBuffers(1, &player_normal_buffer); 
+
+  glGenBuffers(1, &block_vertex_buffer); 
+  glGenBuffers(1, &block_normal_buffer); 
+
+  glGenBuffers(1, &bullet_vertex_buffer); 
+  glGenBuffers(1, &bullet_normal_buffer); 
 
   // get uniform locations
   color_unif = glGetUniformLocation(program, "color");
   offset_unif = glGetUniformLocation(program, "offset"); 
+
+  // load into buffers
+  load_gpu_data(player_vertex_buffer, GL_ARRAY_BUFFER, player_model.len*4*sizeof(float), player_model.vertex_buffer, GL_DYNAMIC_DRAW);
+  load_gpu_data(player_normal_buffer, GL_ARRAY_BUFFER, player_model.len*3*sizeof(float), player_model.normals_buffer, GL_DYNAMIC_DRAW); 
+
+  load_gpu_data(block_vertex_buffer, GL_ARRAY_BUFFER, block_model.len*4*sizeof(float), block_model.vertex_buffer, GL_DYNAMIC_DRAW);
+  load_gpu_data(block_normal_buffer, GL_ARRAY_BUFFER, block_model.len*3*sizeof(float), block_model.normals_buffer, GL_DYNAMIC_DRAW); 
+
+  load_gpu_data(bullet_vertex_buffer, GL_ARRAY_BUFFER, bullet_model.len*4*sizeof(float), bullet_model.vertex_buffer, GL_DYNAMIC_DRAW);
+  load_gpu_data(bullet_normal_buffer, GL_ARRAY_BUFFER, bullet_model.len*3*sizeof(float), bullet_model.normals_buffer, GL_DYNAMIC_DRAW); 
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);	
 }
@@ -62,13 +83,11 @@ void display()
   glEnableVertexAttribArray(0); 
   glEnableVertexAttribArray(1); 
 
-  switch_vbo(object_buffer, GL_ARRAY_BUFFER, player_model.len*4*sizeof(float), player_model.vertex_buffer, GL_STATIC_DRAW);
-  switch_vbo(normal_buffer, GL_ARRAY_BUFFER, player_model.len*3*sizeof(float), player_model.normals_buffer, GL_STATIC_DRAW); 
-
-	glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
+  // draw the player
+	glBindBuffer(GL_ARRAY_BUFFER, player_vertex_buffer); 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, normal_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, player_normal_buffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   glUniform4fv(color_unif, 1, player_color);
@@ -76,20 +95,29 @@ void display()
 
 	glDrawArrays(GL_TRIANGLES, 0, player_model.len);
 
-
-  switch_vbo(object_buffer, GL_ARRAY_BUFFER, player_model.len*4*sizeof(float), block_model.vertex_buffer, GL_STATIC_DRAW); 
-  switch_vbo(normal_buffer, GL_ARRAY_BUFFER, player_model.len*3*sizeof(float), block_model.normals_buffer, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, object_buffer); 
+  // draw the block
+  glBindBuffer(GL_ARRAY_BUFFER, block_vertex_buffer); 
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); 
   
-  glBindBuffer(GL_ARRAY_BUFFER, normal_buffer); 
+  glBindBuffer(GL_ARRAY_BUFFER, block_normal_buffer); 
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
   glUniform4fv(color_unif, 1, block_color); 
   glUniform4fv(offset_unif, 1, block_offset); 
   
   glDrawArrays(GL_TRIANGLES, 0, block_model.len);
+  
+  // draw the bullet 
+  glBindBuffer(GL_ARRAY_BUFFER, bullet_vertex_buffer); 
+  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); 
+  
+  glBindBuffer(GL_ARRAY_BUFFER, bullet_normal_buffer);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  
+  glUniform4fv(color_unif, 1, bullet_color); 
+  glUniform4fv(offset_unif, 1, bullet_offset);
+
+  glDrawArrays(GL_TRIANGLES, 0, bullet_model.len);
 
 	glUseProgram(0);
 	glutSwapBuffers();
@@ -101,7 +129,7 @@ int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE);
-  glutInitWindowSize(1000, 1000);
+  glutInitWindowSize(900, 900);
   glutCreateWindow("Blocks game");
 	
 	GLenum glew_err = glewInit(); 
