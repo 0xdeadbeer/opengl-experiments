@@ -261,3 +261,48 @@ color_data randomize_color(const size_t faces) {
 	color_data output_data = { color_buffer, vertex_count }; 
 	return output_data;
 }
+
+// FIXME
+int collision(float* obj_one_collision_bound, float* obj_two_collision_bound, float* obj_one_offset, float* obj_two_offset) {
+
+	float one_x_start = obj_one_collision_bound[0] + obj_one_offset[0]; 
+	float one_x_end = obj_one_collision_bound[1] + obj_one_offset[0];
+
+	float one_y_start = obj_one_collision_bound[2] + obj_one_offset[1]; 
+	float one_y_end = obj_one_collision_bound[3] + obj_one_offset[1]; 
+
+	float one_z_start = obj_one_collision_bound[4] + obj_one_offset[2]; 
+	float one_z_end = obj_one_collision_bound[5] + obj_one_offset[2]; 
+
+	float two_x_start = obj_two_collision_bound[0] + obj_two_offset[0]; 
+	float two_x_end = obj_two_collision_bound[1] + obj_two_offset[0];
+
+	float two_y_start = obj_two_collision_bound[2] + obj_two_offset[1]; 
+	float two_y_end = obj_two_collision_bound[3] + obj_two_offset[1]; 
+
+	float two_z_start = obj_two_collision_bound[4] + obj_two_offset[2]; 
+	float two_z_end = obj_two_collision_bound[5] + obj_two_offset[2]; 
+
+	bool x_collision = two_x_end >= one_x_start && one_x_end >= two_x_start; 
+	bool y_collision = two_y_end >= one_y_start && one_y_end >= two_y_start; 
+	bool z_collision = two_z_end >= one_z_start && one_z_end >= two_z_start; 
+
+	return x_collision && y_collision && z_collision; 
+}
+
+int touching_borders(float* obj_collision_bound, float* obj_offset, float x_limit, float y_limit) {
+
+  
+	float obj_x_start = obj_collision_bound[0] + obj_offset[0];
+	float obj_x_end = obj_collision_bound[1] + obj_offset[0]; 
+
+	float obj_y_start = obj_collision_bound[2] + obj_offset[1]; ; 
+	float obj_y_end = obj_collision_bound[3] + obj_offset[1]; 
+
+	// printf("X %f Y %f\n", obj_x_start, obj_y_start);
+
+	bool x_collision = x_limit <= obj_x_end || -x_limit >= obj_x_start; 
+	bool y_collision = y_limit <= obj_y_end || -y_limit >= obj_y_start; 
+
+	return x_collision || y_collision; 
+}

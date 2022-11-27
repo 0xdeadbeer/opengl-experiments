@@ -106,4 +106,8 @@ making it available for drawing operations etc
 */
 void load_gpu_data(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage); 
 
+int collision(float* obj_one_collision_bound, float* obj_two_collision_bound, float* obj_one_offset, float* obj_two_offset);
+
+int touching_borders(float* obj_collision_bound, float* obj_offset, float x_limit, float y_limit); 
+
 #endif

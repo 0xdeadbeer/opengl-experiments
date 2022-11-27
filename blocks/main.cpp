@@ -5,8 +5,12 @@
 #include "general-functions.h"
 
 // global variables
-GLuint program, vao;
+int x_screen = 900; 
+int y_screen = 900; 
+float x_limit = x_screen / 30.0f; 
+float y_limit = y_screen / 30.0f; 
 
+GLuint program, vao;
 GLuint player_vertex_buffer, player_normal_buffer,
         block_vertex_buffer, block_normal_buffer,
         bullet_vertex_buffer, bullet_normal_buffer; 
@@ -18,14 +22,93 @@ vertex_data block_model = load_model("./models/block.obj");
 vertex_data bullet_model = load_model("./models/bullet.obj");
 
 // colors
-GLfloat player_color[] = { 0.0f, 1.0f, 1.0f, 1.0f }; 
-GLfloat block_color[] = { 1.0f, 0.0f, 0.0f, 1.0f }; 
-GLfloat bullet_color[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+float player_color[] = { 0.0f, 1.0f, 1.0f, 1.0f }; 
+float block_color[] = { 1.0f, 0.0f, 0.0f, 1.0f }; 
+float bullet_color[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 
 // offsets
-GLfloat player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f }; 
-GLfloat block_offset[] = { 0.0f, 30.0f, -35.0f, 0.0f }; 
-GLfloat bullet_offset[] = { 0.0f, 0.0f, -35.0f, 0.0f };
+float player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f }; 
+float block_offset[] = { 0.0f, 30.0f, -35.0f, 0.0f }; 
+float bullet_offset[] = { 0.0f, -28.0f, -35.0f, 0.0f };
+
+// forces
+float player_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
+float block_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
+float bullet_force[] = { 10.0f, 10.0f, 0.0f, 0.0f }; 
+
+int bullet_force_counter = 1;  
+
+// visible 
+bool player_visible = 0; 
+bool block_visible = 0; 
+bool bullet_visible = 0; 
+
+/**
+collision data 
+
+1-2: x start - x end 
+3-4: y start - y end 
+5-6: z start - z end 
+7-8: w start - w end 
+*/
+
+float player_collision_bound[] = {
+  -1.0f, 1.0f, 
+  -1.0f, 1.0f, 
+  -1.0f, 1.0f,
+  -1.0f, 1.0f, 
+}; 
+float block_collision_bound[] = {
+  -2.5f, 2.5f, 
+  -1.0f, 1.0f, 
+  -1.0f, 1.0f,
+  -1.0f, 1.0f 
+}; 
+float bullet_collision_bound[] = {
+  -0.5f, 0.5f, 
+  -0.5f, 0.5f, 
+  -0.5f, 0.5f, 
+  -0.5f, 0.5f
+}; 
+
+// consts
+float force_scaler = 5000.0f; 
+
+// apply forces to all the objects
+void apply_forces() {
+  for (int i = 0; i < 4; i++) {
+    player_offset[i] += player_force[i] / force_scaler; 
+    block_offset[i] += block_force[i] / force_scaler; 
+    bullet_offset[i] += bullet_force[i] / force_scaler; 
+  }
+}
+
+// rotate the force of the bullet 
+void rotate_forces() {
+  printf("x %f y %f\n", bullet_force[0], bullet_force[1]); 
+  switch (bullet_force_counter) {
+    case 1: 
+      bullet_force[0] = -bullet_force[0]; 
+      break; 
+    case 2: 
+      bullet_force[1] = -bullet_force[1]; 
+      break; 
+    case 3: 
+      bullet_force[0] = -bullet_force[0]; 
+      break; 
+    case 4: 
+      bullet_force[1] = -bullet_force[1]; 
+      break; 
+  }
+  printf("counter %d\n", bullet_force_counter);
+
+  if (bullet_force_counter < 4) {
+    bullet_force_counter++; 
+    return; 
+  }
+  
+  bullet_force_counter = 1; 
+}
 
 // setup memory function
 void memory_setup() {
@@ -63,6 +146,15 @@ void memory_setup() {
 // update output - display function
 void display()
 {
+ 
+  // object updates
+  if (1 == collision(bullet_collision_bound, block_collision_bound, bullet_offset, block_offset) || 
+      1 == collision(bullet_collision_bound, player_collision_bound, bullet_offset, player_offset) || 
+      1 == touching_borders(bullet_collision_bound, bullet_offset, x_limit, y_limit)) 
+      rotate_forces(); 
+
+  apply_forces(); 
+
 	glUseProgram(program);
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -117,7 +209,7 @@ int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE);
-  glutInitWindowSize(900, 900);
+  glutInitWindowSize(x_screen, y_screen);
   glutCreateWindow("Blocks game");
 	
 	GLenum glew_err = glewInit(); 
