@@ -92,10 +92,18 @@ has 3 dimensions - rgb and each is a float)
 color_data randomize_color(const size_t faces);
 
 /**
-Calculate normals for each face/triangle
-*/
-normal_data calc_normals(const size_t vertecies, float *vertex_data);
+Load data into gpu memory
 
-normal_data load_normals(const char *path); 
+<Long description>
+Copy data from the given memory location into the gpu memory, 
+making it available for drawing operations etc
+
+@param buffer: the buffer into which the data should get stored
+@param target: target to which the buffer object will be bound during the operation 
+@param size: number of bytes the function should copy from the given memory address
+@param data: pointer to the memory location 
+@param usage: expected usage pattern of the data
+*/
+void load_gpu_data(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage); 
 
 #endif

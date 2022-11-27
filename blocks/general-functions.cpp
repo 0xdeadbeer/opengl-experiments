@@ -132,6 +132,11 @@ void load_shader(GLuint program, const char *path, GLenum type) {
 	free(file_contents);
 }
 
+void load_gpu_data(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage) {
+	glBindBuffer(target, buffer); 
+	glBufferData(target, size, data, usage); 
+}
+
 vertex_data load_model(const char *path) {
 	int vertex_counter = 0, face_vertex_counter = 0, normals_counter = 0; 
 	vertex *vertecies = NULL; 

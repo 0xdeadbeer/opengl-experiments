@@ -27,18 +27,6 @@ GLfloat player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f };
 GLfloat block_offset[] = { 0.0f, 30.0f, -35.0f, 0.0f }; 
 GLfloat bullet_offset[] = { 0.0f, 0.0f, -35.0f, 0.0f };
 
-// scales 
-
-// rotations
-
-// switch vbo data
-void load_gpu_data(GLuint buffer, GLenum target, GLsizeiptr size, const GLvoid *data, GLenum usage) {
-  glBindBuffer(target, buffer); 
-  glBufferData(target, size, data, usage); 
-}
-
-// draw function 
-
 // setup memory function
 void memory_setup() {
 	program = glCreateProgram();
