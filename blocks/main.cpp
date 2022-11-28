@@ -33,7 +33,8 @@ float player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f };
 float block_offset[] = { 0.0f, 20.0f, -35.0f, 0.0f }; 
 float bullet_offset[] = { -9.0f, -28.0f, -35.0f, 0.0f };
 
-const float* instancing_offsets = (const float*) generate_instancing_offsets(30 * 2); 
+float* instancing_offsets = (float*) generate_instancing_offsets(30 * 2); 
+int* collision_locker = (int*) malloc(30 * sizeof(int)); 
 
 // forces
 float player_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
@@ -121,6 +122,8 @@ void rotate_forces() {
 void memory_setup() {
 	normal_program = glCreateProgram();
   instancing_program = glCreateProgram();
+  memset(collision_locker, 0, 30 * sizeof(int)); 
+
 
 	load_shader(normal_program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
 	load_shader(normal_program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
@@ -158,12 +161,32 @@ void display()
 {
  
   // object updates
-  if (1 == collision(bullet_collision_bound, block_collision_bound, bullet_offset, block_offset) || 
-      1 == collision(bullet_collision_bound, player_collision_bound, bullet_offset, player_offset) || 
-      1 == touching_borders(bullet_collision_bound, bullet_offset, x_limit, y_limit)) 
-      rotate_forces(); 
+  if (1 == collision(bullet_collision_bound, player_collision_bound, bullet_offset, player_offset) || 
+      1 == touching_borders(bullet_collision_bound, bullet_offset, x_limit, y_limit)) {
+    rotate_forces(); 
+  } else {
+    for (int i = 0; i < 60; i += 2) {
+      if (1 == collision_locker[i/2]) continue; 
+      float instanced_block_offset[] = {
+        block_offset[0] + instancing_offsets[i], 
+        block_offset[1] + instancing_offsets[i+1], 
+        block_offset[2],
+        block_offset[3]
+      }; 
 
-  apply_forces(); 
+      if (1 == collision(bullet_collision_bound, block_collision_bound, bullet_offset, instanced_block_offset)) {
+        rotate_forces();
+        collision_locker[i/2] = 1; 
+        
+        // FIXME
+        instancing_offsets[i] += 500.0f; 
+        instancing_offsets[i+1] += 500.0f;
+        break; 
+      }
+    }
+  }
+
+  apply_forces();
 
 	glUseProgram(normal_program);
 
@@ -194,16 +217,11 @@ void display()
   glBindBuffer(GL_ARRAY_BUFFER, block_normal_buffer); 
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  float block_offset_one[2] = { -3.0f, 0.0f, }; 
-  float block_offset_two[2] = { 3.0f, 0.0f }; 
-
   glUniform4fv(glGetUniformLocation(instancing_program, "color"), 1, block_color); 
   glUniform4fv(glGetUniformLocation(instancing_program, "offset"), 1, block_offset); 
-  // glUniform2fv(glGetUniformLocation(instancing_program, "instance_offsets[" + "0" + "]"), 1, block_offset_one); 
 
   for (int i = 0; i < 30; i++)
-    glUniform2fv(glGetUniformLocation(instancing_program, ("instance_offsets[" + std::to_string(i) + "]").c_str()), 1, (const float*) &instancing_offsets[i*2]); 
-
+    glUniform2fv(glGetUniformLocation(instancing_program, ("instance_offsets[" + std::to_string(i) + "]").c_str()), 1, (float*) &instancing_offsets[i*2]); 
 
   glDrawArraysInstanced(GL_TRIANGLES, 0, block_model.len, 30);
   
@@ -235,23 +253,12 @@ void keyboard(unsigned char key, int x, int y) {
     case 'd': 
       player_offset[0] += player_movement_force; 
       break; 
-    case 's':
-      player_offset[1] -= player_movement_force; 
-      break; 
-    case 'w': 
-      player_offset[1] += player_movement_force; 
-      break; 
   }
 }
 
 // main function
 int main(int argc, char** argv)
 {
-
-for (int i = 0; i < 60; i += 2) {
-  printf("X %f Y %f\n", instancing_offsets[i], instancing_offsets[i+1]); 
-}
-
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE);

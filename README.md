@@ -13,5 +13,7 @@
   <li><a href="./illumination/main.cpp">illumination</a> - Illumination playground</li>
   <img src="/illumination/images/illumination_1.png" height="200" /> 
   <img src="/illumination/images/illumination_2.png" height="200" />
-  <li>games - Mini games in OpenGL</li>
+  <li>blocks - Write a mini game in OpenGL (blocks game)</li>
+  <img src="/blocks/images/blocks_1.png" height="200" /> 
+  <img src="/blocks/images/blocks_2.png" height="200" />
 </ul>

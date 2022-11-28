@@ -306,6 +306,7 @@ int collision(float* obj_one_collision_bound, float* obj_two_collision_bound, fl
 	return x_collision && y_collision && z_collision; 
 }
 
+// FIXME
 int touching_borders(float* obj_collision_bound, float* obj_offset, float x_limit, float y_limit) {
 
   
