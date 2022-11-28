@@ -3,7 +3,7 @@
 
 <b>Author:</b> Osamu-KJ
 
-<b>Blog and learning resources: </b> <a href="https://osamu-kj.gitbook.io/">0x0_nerdz_c0rner!</a>
+<b><a href="https://osamu-kj.gitbook.io/">My blog and learning resources list</a> || <a href="https://www.youtube.com/watch?v=ns7Tipnz13k">My youtube channel</a></b>
 
 <ul>
   <li><a href="./3d_model/main.cpp">3d_model</a> - Load a model from the disk into opengl</li>
@@ -13,7 +13,7 @@
   <li><a href="./illumination/main.cpp">illumination</a> - Illumination playground</li>
   <img src="/illumination/images/illumination_1.png" height="200" /> 
   <img src="/illumination/images/illumination_2.png" height="200" />
-  <li>blocks - Write a mini game in OpenGL (blocks game)</li>
+  <li><a href="./blocks/main.cpp">blocks</a> - Write a mini game in OpenGL (blocks game)</li>
   <img src="/blocks/images/blocks_1.png" height="200" /> 
   <img src="/blocks/images/blocks_2.png" height="200" />
 </ul>
