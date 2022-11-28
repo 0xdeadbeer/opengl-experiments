@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <GL/glew.h>
@@ -10,7 +11,8 @@ int y_screen = 900;
 float x_limit = x_screen / 30.0f; 
 float y_limit = y_screen / 30.0f; 
 
-GLuint program, vao;
+GLuint normal_program, instancing_program; 
+GLuint vao;
 GLuint player_vertex_buffer, player_normal_buffer,
         block_vertex_buffer, block_normal_buffer,
         bullet_vertex_buffer, bullet_normal_buffer; 
@@ -30,6 +32,8 @@ float bullet_color[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 float player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f }; 
 float block_offset[] = { 0.0f, 20.0f, -35.0f, 0.0f }; 
 float bullet_offset[] = { -9.0f, -28.0f, -35.0f, 0.0f };
+
+const float* instancing_offsets = (const float*) generate_instancing_offsets(30 * 2); 
 
 // forces
 float player_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
@@ -115,10 +119,11 @@ void rotate_forces() {
 
 // setup memory function
 void memory_setup() {
-	program = glCreateProgram();
+	normal_program = glCreateProgram();
+  instancing_program = glCreateProgram();
 
-	load_shader(program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
-	load_shader(program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
+	load_shader(normal_program, "./data/vertex-shader.vert", GL_VERTEX_SHADER);
+	load_shader(normal_program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER);
 
   glGenBuffers(1, &player_vertex_buffer); 
   glGenBuffers(1, &player_normal_buffer); 
@@ -129,9 +134,11 @@ void memory_setup() {
   glGenBuffers(1, &bullet_vertex_buffer); 
   glGenBuffers(1, &bullet_normal_buffer); 
 
-  // get uniform locations
-  color_unif = glGetUniformLocation(program, "color");
-  offset_unif = glGetUniformLocation(program, "offset"); 
+  color_unif = glGetUniformLocation(normal_program, "color");
+  offset_unif = glGetUniformLocation(normal_program, "offset"); 
+
+  load_shader(instancing_program, "./data/vertex-instancing-shader.vert", GL_VERTEX_SHADER); 
+  load_shader(instancing_program, "./data/fragment-shader.frag", GL_FRAGMENT_SHADER); 
 
   // load into buffers
   load_gpu_data(player_vertex_buffer, GL_ARRAY_BUFFER, player_model.len*4*sizeof(float), player_model.vertex_buffer, GL_DYNAMIC_DRAW);
@@ -158,7 +165,7 @@ void display()
 
   apply_forces(); 
 
-	glUseProgram(program);
+	glUseProgram(normal_program);
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -178,18 +185,30 @@ void display()
 
 	glDrawArrays(GL_TRIANGLES, 0, player_model.len);
 
-  // draw the block
+  glUseProgram(instancing_program);
+
+  // draw the blocks
   glBindBuffer(GL_ARRAY_BUFFER, block_vertex_buffer); 
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); 
   
   glBindBuffer(GL_ARRAY_BUFFER, block_normal_buffer); 
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  glUniform4fv(color_unif, 1, block_color); 
-  glUniform4fv(offset_unif, 1, block_offset); 
+  float block_offset_one[2] = { -3.0f, 0.0f, }; 
+  float block_offset_two[2] = { 3.0f, 0.0f }; 
+
+  glUniform4fv(glGetUniformLocation(instancing_program, "color"), 1, block_color); 
+  glUniform4fv(glGetUniformLocation(instancing_program, "offset"), 1, block_offset); 
+  // glUniform2fv(glGetUniformLocation(instancing_program, "instance_offsets[" + "0" + "]"), 1, block_offset_one); 
+
+  for (int i = 0; i < 30; i++)
+    glUniform2fv(glGetUniformLocation(instancing_program, ("instance_offsets[" + std::to_string(i) + "]").c_str()), 1, (const float*) &instancing_offsets[i*2]); 
+
+
+  glDrawArraysInstanced(GL_TRIANGLES, 0, block_model.len, 30);
   
-  glDrawArrays(GL_TRIANGLES, 0, block_model.len);
-  
+  glUseProgram(normal_program);   
+
   // draw the bullet 
   glBindBuffer(GL_ARRAY_BUFFER, bullet_vertex_buffer); 
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0); 
@@ -228,6 +247,12 @@ void keyboard(unsigned char key, int x, int y) {
 // main function
 int main(int argc, char** argv)
 {
+
+for (int i = 0; i < 60; i += 2) {
+  printf("X %f Y %f\n", instancing_offsets[i], instancing_offsets[i+1]); 
+}
+
+
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE);
   glutInitWindowSize(x_screen, y_screen);

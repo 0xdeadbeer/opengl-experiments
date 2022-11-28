@@ -262,6 +262,22 @@ color_data randomize_color(const size_t faces) {
 	return output_data;
 }
 
+float* generate_instancing_offsets(int count) {
+	float* output_buffer = (float*) malloc(count * sizeof(float)); 
+
+	for (int y = 0; y < 3; y++) {
+		for (int x = 0; x < 20; x += 2) {
+			float x_value = (x*3) - 27.0f; 
+			float y_value = y * 3.0f; 
+
+			output_buffer[(y * 20) + x] = x_value; 
+			output_buffer[(y * 20) + x + 1] = y_value; 
+		}
+	}
+
+	return output_buffer; 
+}
+
 // FIXME
 int collision(float* obj_one_collision_bound, float* obj_two_collision_bound, float* obj_one_offset, float* obj_two_offset) {
 
