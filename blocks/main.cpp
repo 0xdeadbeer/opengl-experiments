@@ -28,20 +28,25 @@ float bullet_color[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 
 // offsets
 float player_offset[] = { 0.0f, -30.0f, -35.0f, 0.0f }; 
-float block_offset[] = { 0.0f, 30.0f, -35.0f, 0.0f }; 
-float bullet_offset[] = { 0.0f, -28.0f, -35.0f, 0.0f };
+float block_offset[] = { 0.0f, 20.0f, -35.0f, 0.0f }; 
+float bullet_offset[] = { -9.0f, -28.0f, -35.0f, 0.0f };
 
 // forces
 float player_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
 float block_force[] = { 0.0f, 0.0f, 0.0f, 0.0f }; 
-float bullet_force[] = { 10.0f, 10.0f, 0.0f, 0.0f }; 
+float bullet_force[] = { 5.0f, 5.0f, 0.0f, 0.0f }; 
 
+// keyboard input forces 
+float player_movement_force = 1.0f; 
+
+// force counters
 int bullet_force_counter = 1;  
 
 // visible 
 bool player_visible = 0; 
 bool block_visible = 0; 
 bool bullet_visible = 0; 
+
 
 /**
 collision data 
@@ -85,7 +90,6 @@ void apply_forces() {
 
 // rotate the force of the bullet 
 void rotate_forces() {
-  printf("x %f y %f\n", bullet_force[0], bullet_force[1]); 
   switch (bullet_force_counter) {
     case 1: 
       bullet_force[0] = -bullet_force[0]; 
@@ -100,7 +104,6 @@ void rotate_forces() {
       bullet_force[1] = -bullet_force[1]; 
       break; 
   }
-  printf("counter %d\n", bullet_force_counter);
 
   if (bullet_force_counter < 4) {
     bullet_force_counter++; 
@@ -204,6 +207,24 @@ void display()
 	glutPostRedisplay();
 }
 
+// keyboard input function 
+void keyboard(unsigned char key, int x, int y) {
+  switch (key) {
+    case 'a': 
+      player_offset[0] -= player_movement_force; 
+      break; 
+    case 'd': 
+      player_offset[0] += player_movement_force; 
+      break; 
+    case 's':
+      player_offset[1] -= player_movement_force; 
+      break; 
+    case 'w': 
+      player_offset[1] += player_movement_force; 
+      break; 
+  }
+}
+
 // main function
 int main(int argc, char** argv)
 {
@@ -232,9 +253,12 @@ int main(int argc, char** argv)
 	GLenum error = glGetError(); 
 	printf("DEBUG: %d\n", error);
 
-	// load the models into memory, setup the functions
+	// load the models into memory
 	memory_setup();
+
+  // setup the functions 
   glutDisplayFunc(display);
+  glutKeyboardFunc(keyboard); 
 
 	// enter the event loop
   glutMainLoop();

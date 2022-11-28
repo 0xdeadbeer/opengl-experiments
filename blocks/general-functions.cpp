@@ -299,8 +299,6 @@ int touching_borders(float* obj_collision_bound, float* obj_offset, float x_limi
 	float obj_y_start = obj_collision_bound[2] + obj_offset[1]; ; 
 	float obj_y_end = obj_collision_bound[3] + obj_offset[1]; 
 
-	// printf("X %f Y %f\n", obj_x_start, obj_y_start);
-
 	bool x_collision = x_limit <= obj_x_end || -x_limit >= obj_x_start; 
 	bool y_collision = y_limit <= obj_y_end || -y_limit >= obj_y_start; 
 
